@@ -31,6 +31,14 @@ function Auth() {
     setLoading(true);
     setMessage('');
 
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -40,7 +48,14 @@ function Auth() {
       if (error) throw error;
       setMessage('Sign up successful! Please check your email to verify.');
     } catch (error) {
-      setMessage(error.message);
+      // Provide more specific error messages
+      if (error.message.includes('invalid')) {
+        setMessage('The email address is invalid. Please check and try again.');
+      } else if (error.message.includes('already registered')) {
+        setMessage('This email is already registered. Please try logging in.');
+      } else {
+        setMessage(error.message);
+      }
     } finally {
       setLoading(false);
     }
